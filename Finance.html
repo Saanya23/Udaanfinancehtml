@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Zodiac – Teen Edition</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1/dist/phosphor-icons.js"></script>
+<style>
+:root {
+  --bg-deep:#010B14;
+  --card-bg: rgba(77,208,225,0.08);
+  --text-main:#E0F7FA;
+  --accent-luminous:#4DD0E1;
+  --accent-glow:#00BCD4;
+}
+body {
+  font-family:'Inter',sans-serif;
+  background: radial-gradient(circle at 20% 30%, #061726 0%, #010B14 100%);
+  color: var(--text-main);
+  margin:0;
+  min-height:100vh;
+  overflow-x:hidden;
+  position: relative;
+}
+.summary-card {
+  background: var(--card-bg);
+  border: 1px solid rgba(77,208,225,0.2);
+  box-shadow: 0 0 40px rgba(77,208,225,0.1);
+  transition: all 0.5s ease-out;
+  transform: translateY(20px) scale(0.95);
+  opacity:0;
+  padding:2rem;
+  border-radius:1rem;
+}
+.summary-card.show {
+  transform: translateY(0) scale(1);
+  opacity:1;
+}
+.header-focus {
+  color: var(--accent-luminous);
+  text-shadow: 0 0 25px rgba(77,208,225,0.9);
+}
+.section-title {
+  color: var(--accent-luminous);
+  border-bottom:2px solid rgba(77,208,225,0.5);
+  padding-bottom:0.5rem;
+  font-weight:600;
+}
+.content-list li {
+  padding-left:1.5rem;
+  margin-bottom:0.5rem;
+  position:relative;
+  line-height:1.6;
+  font-weight:300;
+}
+.content-list li::before {
+  content:'✦';
+  color: var(--accent-luminous);
+  font-weight:bold;
+  display:inline-block;
+  width:1em;
+  margin-left:-1em;
+}
+.floating-btn {
+  background: linear-gradient(90deg,var(--accent-glow),var(--accent-luminous));
+  color: var(--bg-deep);
+  font-weight:700;
+  padding:0.75rem 1.5rem;
+  border-radius:9999px;
+  box-shadow:0 6px 25px rgba(0,188,212,0.7);
+  transition: all 0.3s ease-in-out, transform 0.3s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.floating-btn:hover {
+  transform: scale(1.15) rotateZ(2deg);
+  box-shadow: 0 8px 35px rgba(0,188,212,0.9);
+}
+#floatingNav {
+  display:flex;
+  flex-direction:column;
+  gap:1rem;
+}
+.temp-message {
+  backdrop-filter: blur(4px);
+  border:1px solid rgba(77,208,225,0.2);
+  padding:1rem;
+  border-radius:1rem;
+  position:fixed;
+  top:1rem;
+  right:1rem;
+  z-index:50;
+  font-weight:500;
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+  opacity:0;
+  transform:translateX(20px);
+  transition: all 0.5s ease-in-out;
+}
+body::before {
+  content:'';
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:url('https://i.ibb.co/YbYzgjH/stars.png') repeat;
+  opacity:0.05;
+  z-index:0;
+}
+</style>
+</head>
+<body>
+
+<div class="flex flex-col items-center py-10 px-4 md:px-8 relative z-10">
+  <div class="w-full max-w-7xl p-6 md:p-10 rounded-xl bg-white/5 shadow-2xl relative z-10">
+
+    <header class="flex flex-col items-center text-center mb-8 pb-4 border-b border-white/10">
+      <h1 class="text-5xl md:text-6xl font-extrabold mb-2 header-focus">Financial Zodiac – Teen Edition</h1>
+      <p class="text-lg text-gray-400 italic">Learn about your cosmic money destiny & future finance fun!</p>
+    </header>
+
+    <!-- Input Form -->
+    <div id="inputForm" class="flex flex-col items-center">
+      <h2 class="text-2xl md:text-3xl font-medium text-center mb-6 text-gray-200">Enter Your Name & Birth Date</h2>
+      <div class="flex flex-col md:flex-row gap-4 mb-8 w-full max-w-lg">
+        <input id="name" type="text" placeholder="Your Name" class="flex-1 w-full p-3 rounded-lg text-lg bg-white/5 border border-white/20 placeholder-gray-400 text-white focus:ring-1 focus:ring-current transition" autocomplete="name">
+        <input id="birth" type="date" class="flex-1 w-full p-3 rounded-lg text-lg bg-white/5 border border-white/20 text-white focus:ring-1 focus:ring-current transition" autocomplete="bday">
+      </div>
+      <button id="reveal" class="floating-btn text-xl px-12 py-3">
+        <i class="ph ph-sparkle-fill mr-2"></i> Reveal Your Zodiac
+      </button>
+    </div>
+
+    <!-- Page 1 Report -->
+    <div id="mainReportContainer" style="display:none;">
+      <h2 id="reportGreeting" class="text-3xl md:text-4xl font-bold text-center mt-6 mb-6 text-white/90">
+        Cosmic Reading for <span id="userNameDisplay" class="header-focus"></span>
+      </h2>
+
+      <div class="summary-card p-5 rounded-xl mb-6 show" id="archetypePanel">
+        <h3 class="text-2xl font-bold section-title flex items-center mb-3"><i class="ph ph-comet-fill mr-2 text-2xl"></i> Your Financial Archetype</h3>
+        <p class="text-3xl font-extrabold text-center py-4 header-focus" id="archetypeTitle"></p>
+        <p id="zodiacTraits" class="text-lg text-gray-300 text-center italic leading-relaxed"></p>
+      </div>
+
+      <button id="nextPage" class="floating-btn text-xl mt-4 mx-auto">
+        <i class="ph ph-arrow-right-fill mr-2"></i> Next Page
+      </button>
+    </div>
+
+    <!-- Page 2: Tips & Meme -->
+    <div id="page2" style="display:none;">
+      <div class="summary-card p-5 rounded-xl mb-6 show" id="tipPanel">
+        <h3 class="text-2xl md:text-3xl font-extrabold text-accent-luminous mb-3 flex items-center justify-center"><i class="ph ph-rocket-launch-fill mr-3 text-2xl"></i> Fun Finance Tip</h3>
+        <p id="tipContent" class="text-lg text-gray-200 leading-relaxed mb-4"></p>
+        <button id="revealMeme" class="floating-btn text-lg px-8 py-3 w-full md:w-auto">
+          <i class="ph ph-smiley-fill mr-2"></i> Reveal Your Zodiac Meme
+        </button>
+      </div>
+      <div id="memeContainer" class="text-center mt-6"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="floatingNav" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3" style="display:none;">
+  <button id="scrollToTop" class="floating-btn text-sm flex items-center"><i class="ph ph-arrow-up-fill mr-2"></i> Scroll Top</button>
+  <button id="resetFloat" class="floating-btn text-sm flex items-center"><i class="ph ph-arrows-counter-clockwise mr-2"></i> Reset Data</button>
+</div>
+
+<script>
+// Basic zodiac data for teens
+const teenZodiacs = {
+  1:{title:"Capricorn – The Strategist",traits:"You like planning! Focus on saving small amounts early and watch it grow. Check out kid-friendly apps for virtual stock trading.",tip:"This week: Start a virtual portfolio using $100 play money."},
+  2:{title:"Aquarius – The Innovator",traits:"Tech and ideas excite you! Learn blockchain basics and how games like Bitcoin Tycoon work.",tip:"This week: Watch a fun YouTube about cryptocurrency safety."},
+  3:{title:"Pisces – The Humanitarian",traits:"You care about people! Explore charities or micro-loans and see how money can help others.",tip:"This week: Track one small donation and its effect."},
+  4:{title:"Aries – The Initiator",traits:"Bold and curious! Try small challenges like saving $1 per day.",tip:"This week: Challenge yourself to save $5 extra in a fun jar."},
+  5:{title:"Taurus – The Builder",traits:"You love stability. Learn about piggy banks, savings accounts, and basic interest.",tip:"This week: Calculate how $10 grows with 1% interest."},
+  6:{title:"Gemini – The Communicator",traits:"You enjoy talking and sharing ideas! Discuss money with parents and plan a small budget.",tip:"This week: Write down 3 ways to earn $5 this week."},
+  7:{title:"Cancer – The Protector",traits:"You care about safety. Learn about keeping allowances safe and why not all coins are the same.",tip:"This week: Count your coins and note which are most valuable."},
+  8:{title:"Leo – The Leader",traits:"You like leading! Start a small team project, track who brings in points (like pretend money).",tip:"This week: Create a pretend 'bank' with friends."},
+  9:{title:"Virgo – The Auditor",traits:"You love details. Track your allowance for one week and see where it goes.",tip:"This week: Make a chart of your spending vs saving."},
+  10:{title:"Libra – The Harmonizer",traits:"Fairness matters! Learn to share money or trade fairly with friends.",tip:"This week: Swap a small toy and track its 'value'."},
+  11:{title:"Scorpio – The Transformer",traits:"Curious and intense! Research one finance concept like 'what is Bitcoin?'",tip:"This week: Watch a 5-minute kid-friendly video on crypto."},
+  12:{title:"Sagittarius – The Explorer",traits:"Love adventure! Learn about global money, currencies, and simple economics.",tip:"This week: Pick a country and see its money notes and coins."}
+};
+
+const memes = {
+  1:'https://i.ibb.co/TKqmrjc/capricorn-meme.png',
+  2:'https://i.ibb.co/MBqgYdR/aquarius-meme.png',
+  3:'https://i.ibb.co/tp2P8x4/pisces-meme.png',
+  4:'https://i.ibb.co/QFz5Y9X/aries-meme.png',
+  5:'https://i.ibb.co/K0f1mr0/taurus-meme.png',
+  6:'https://i.ibb.co/L0GtMsz/gemini-meme.png',
+  7:'https://i.ibb.co/JQFGF4K/cancer-meme.png',
+  8:'https://i.ibb.co/cc0sW2n/leo-meme.png',
+  9:'https://i.ibb.co/N7dq8tT/virgo-meme.png',
+  10:'https://i.ibb.co/2sSxq1F/libra-meme.png',
+  11:'https://i.ibb.co/L1M7WrR/scorpio-meme.png',
+  12:'https://i.ibb.co/WnTq0mX/sagittarius-meme.png'
+};
+
+function getZodiac(month, day){
+  if((month==1 && day>=20)||(month==2 && day<=18)) return 2;
+  if((month==2 && day>=19)||(month==3 && day<=20)) return 3;
+  if((month==3 && day>=21)||(month==4 && day<=19)) return 4;
+  if((month==4 && day>=20)||(month==5 && day<=20)) return 5;
+  if((month==5 && day>=21)||(month==6 && day<=20)) return 6;
+  if((month==6 && day>=21)||(month==7 && day<=22)) return 7;
+  if((month==7 && day>=23)||(month==8 && day<=22)) return 8;
+  if((month==8 && day>=23)||(month==9 && day<=22)) return 9;
+  if((month==9 && day>=23)||(month==10 && day<=22)) return 10;
+  if((month==10 && day>=23)||(month==11 && day<=21)) return 11;
+  if((month==11 && day>=22)||(month==12 && day<=21)) return 12;
+  return 1;
+}
+
+// DOM Elements
+const state = {};
+const el = {
+  reveal: document.getElementById('reveal'),
+  nextPage: document.getElementById('nextPage'),
+  revealMeme: document.getElementById('revealMeme'),
+  resetFloat: document.getElementById('resetFloat'),
+  scrollToTop: document.getElementById('scrollToTop'),
+  name: document.getElementById('name'),
+  birth: document.getElementById('birth'),
+  mainReportContainer: document.getElementById('mainReportContainer'),
+  userNameDisplay: document.getElementById('userNameDisplay'),
+  archetypeTitle: document.getElementById('archetypeTitle'),
+  zodiacTraits: document.getElementById('zodiacTraits'),
+  tipContent: document.getElementById('tipContent'),
+  page2: document.getElementById('page2'),
+  inputForm: document.getElementById('inputForm'),
+  floatingNav: document.getElementById('floatingNav'),
+  memeContainer: document.getElementById('memeContainer')
+};
+
+function showMessage(msg){
+  const box=document.createElement('div');
+  box.className='temp-message';
+  box.textContent=msg;
+  document.body.appendChild(box);
+  setTimeout(()=>{box.style.opacity='1'; box.style.transform='translateX(0)';},10);
+  setTimeout(()=>{box.style.opacity='0'; box.style.transform='translateX(20px)';},4000);
+  setTimeout(()=>box.remove(),4500);
+}
+
+function generateReading(){
+  state.name = el.name.value.trim().split(' ')[0];
+  state.birth = el.birth.value;
+  if(!state.name || !state.birth){ showMessage("Enter name & birthdate!"); return; }
+  const d = new Date(state.birth);
+  const zodiac = getZodiac(d.getMonth()+1,d.getDate());
+  const data = teenZodiacs[zodiac];
+  el.userNameDisplay.textContent = state.name;
+  el.archetypeTitle.textContent = data.title;
+  el.zodiacTraits.textContent = data.traits;
+  el.tipContent.textContent = data.tip;
+  el.mainReportContainer.style.display='block';
+  el.floatingNav.style.display='flex';
+  el.inputForm.style.display='none';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function showNextPage(){ el.page2.style.display='block'; window.scrollTo({top:0,behavior:'smooth'});}
+function revealMeme(){ 
+  const d = new Date(el.birth.value);
+  const zodiac = getZodiac(d.getMonth()+1,d.getDate());
+  el.memeContainer.innerHTML=`<img src="${memes[zodiac]}" class="mx-auto rounded-xl shadow-2xl" style="max-width:300px;">`; 
+}
+function resetApp(){ location.reload(); }
+
+el.reveal.addEventListener('click', generateReading);
+el.nextPage.addEventListener('click', showNextPage);
+el.revealMeme.addEventListener('click', revealMeme);
+el.resetFloat.addEventListener('click', resetApp);
+el.scrollToTop.addEventListener('click',()=>{window.scrollTo({top:0,behavior:'smooth'});});
+</script>
+</body>
+</html>
